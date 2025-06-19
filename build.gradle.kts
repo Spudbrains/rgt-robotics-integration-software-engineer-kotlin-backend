@@ -23,6 +23,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.25")
     runtimeOnly("org.postgresql:postgresql:42.7.3")

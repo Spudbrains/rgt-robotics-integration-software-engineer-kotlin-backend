@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = ["http://localhost:3000"])
+@CrossOrigin(origins = ["http://localhost:3000", "https://rgt-robotics-integration.vercel.app"])
 class BookController(private val bookService: BookService) {
     
     @GetMapping

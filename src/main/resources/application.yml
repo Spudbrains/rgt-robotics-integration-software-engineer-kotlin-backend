@@ -3,10 +3,10 @@ spring:
     name: bookstore-api
   
   datasource:
-    url: ${DATABASE_URL}
+    url: ${SPRING_DATASOURCE_URL}
     driver-class-name: org.postgresql.Driver
-    username: ${PGUSER}
-    password: ${PGPASSWORD}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   
   h2:
     console:
@@ -20,7 +20,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   
   sql:
     init:
@@ -32,4 +32,10 @@ server:
 logging:
   level:
     com.example.bookstore: DEBUG
-    org.springframework.web: DEBUG 
+    org.springframework.web: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info 

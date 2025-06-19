@@ -13,9 +13,9 @@ interface BookRepository : JpaRepository<Book, Long> {
     
     @Query("""
         SELECT b FROM Book b 
-        WHERE (:search IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :search, '%')) 
-        OR LOWER(b.author) LIKE LOWER(CONCAT('%', :search, '%')))
-        AND (:genre IS NULL OR LOWER(b.genre) = LOWER(:genre))
+        WHERE (:search IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')) 
+        OR LOWER(b.author) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))
+        AND (:genre IS NULL OR LOWER(b.genre) = LOWER(CAST(:genre AS text)))
     """)
     fun findBySearchAndGenre(
         @Param("search") search: String?,

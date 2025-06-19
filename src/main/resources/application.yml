@@ -3,10 +3,10 @@ spring:
     name: bookstore-api
   
   datasource:
-    url: jdbc:h2:mem:bookstoredb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
+    url: ${DATABASE_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
   
   h2:
     console:
@@ -15,7 +15,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -27,7 +27,7 @@ spring:
       mode: NEVER
 
 server:
-  port: 3001
+  port: ${PORT:8080}
 
 logging:
   level:

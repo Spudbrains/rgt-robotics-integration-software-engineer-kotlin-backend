@@ -19,6 +19,7 @@ class BookService(private val bookRepository: BookRepository) {
         sortBy: String = "title",
         sortOrder: String = "asc"
     ): Page<Book> {
+        println("DEBUG: search=$search ({search?.javaClass?.name}), genre=$genre ({genre?.javaClass?.name}), sortBy=$sortBy ({sortBy.javaClass.name}), sortOrder=$sortOrder ({sortOrder.javaClass.name})")
         val sort = if (sortOrder.equals("desc", ignoreCase = true)) {
             Sort.by(Sort.Direction.DESC, sortBy)
         } else {

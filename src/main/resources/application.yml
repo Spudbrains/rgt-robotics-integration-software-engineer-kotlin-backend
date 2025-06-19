@@ -21,6 +21,8 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        type: trace
   
   sql:
     init:
@@ -33,6 +35,7 @@ logging:
   level:
     com.example.bookstore: DEBUG
     org.springframework.web: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 management:
   endpoints:

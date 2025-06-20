@@ -11,16 +11,18 @@ A complete Spring Boot RESTful API built with Kotlin for online bookstore manage
 - **Sorting**: Sort books by any field in ascending or descending order
 - **Inventory Management**: Track and update book stock levels
 - **Sales Processing**: Process book sales with stock validation
-- **H2 Database**: In-memory database with console access
+- **PostgreSQL Database**: Production-ready database support
+- **Docker Support**: Containerized deployment ready
 - **CORS Support**: Configured for frontend integration
 
 ## 🛠️ Technology Stack
 
-- **Kotlin** - Programming language
+- **Kotlin 1.9.25** - Programming language
 - **Spring Boot 3.5.0** - Application framework
 - **Spring Data JPA** - Data access layer
-- **H2 Database** - In-memory database
-- **Gradle** - Build tool (with wrapper)
+- **PostgreSQL** - Production database
+- **Gradle 8.5.0** - Build tool (with wrapper)
+- **Docker** - Containerization
 
 ## 📁 Project Structure
 
@@ -34,6 +36,7 @@ bookstore-backend/
 │   ├── gradle-wrapper.jar
 │   └── gradle-wrapper.properties
 ├── start-app.bat                    # Windows startup script
+├── Dockerfile                       # Docker container configuration
 ├── src/main/kotlin/com/example/bookstore/
 │   ├── BookstoreApplication.kt      # Main application class
 │   ├── DataInitializer.kt           # Database initialization
@@ -54,8 +57,115 @@ bookstore-backend/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Java 21 or higher
+- Java 17 or higher
+- PostgreSQL database (for production)
 - No additional tools required (Gradle wrapper included)
+
+### Ubuntu 18.04 Fresh Installation Setup
+
+If you're setting up this application on a fresh Ubuntu 18.04 system, follow these steps:
+
+#### 1. Update System Packages
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+#### 2. Install Java 17
+```bash
+# Add OpenJDK repository
+sudo apt install -y software-properties-common
+sudo add-apt-repository ppa:openjdk-r/ppa -y
+sudo apt update
+
+# Install OpenJDK 17
+sudo apt install -y openjdk-17-jdk
+
+# Verify installation
+java -version
+javac -version
+```
+
+#### 3. Set JAVA_HOME Environment Variable
+```bash
+# Add to your shell profile
+echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
+echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify JAVA_HOME
+echo $JAVA_HOME
+```
+
+#### 4. Clone and Setup the Application
+```bash
+# Clone the repository (if not already done)
+git clone https://github.com/Spudbrains/rgt-robotics-integration-software-engineer-kotlin-backend
+cd rgt-robotics-integration-software-engineer-kotlin-backend
+
+# Make Gradle wrapper executable
+chmod +x gradlew
+```
+
+#### 5. Run the Application
+```bash
+# Using H2 database (recommended for development)
+./gradlew bootRun
+
+# Alternative: Build and run JAR
+./gradlew build
+java -jar build/libs/bookstore-0.0.1-SNAPSHOT.jar
+```
+
+#### 6. Verify the Application
+```bash
+# Check if the application is running
+curl http://localhost:8080/actuator/health
+
+# Test the API
+curl http://localhost:8080/api/books
+
+# Access H2 console
+# Open browser: http://localhost:8080/h2-console
+# JDBC URL: jdbc:h2:mem:bookstoredb
+# Username: sa
+# Password: password
+```
+
+#### 7. Troubleshooting Common Issues
+
+**Port 8080 already in use:**
+```bash
+# Find process using port 8080
+sudo netstat -tulpn | grep :8080
+
+# Kill the process
+sudo kill -9 <PID>
+```
+
+**Permission denied on gradlew:**
+```bash
+chmod +x gradlew
+```
+
+**Java not found:**
+```bash
+# Reinstall Java
+sudo apt install --reinstall openjdk-17-jdk
+```
+
+### Environment Setup
+
+Set up the following environment variables for database connection:
+
+```bash
+# Database Configuration
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/bookstoredb
+SPRING_DATASOURCE_USERNAME=your_username
+SPRING_DATASOURCE_PASSWORD=your_password
+
+# Server Configuration (optional)
+PORT=8080
+```
 
 ### Running the Application
 
@@ -82,12 +192,16 @@ start-app.bat
 java -jar build/libs/bookstore-0.0.1-SNAPSHOT.jar
 ```
 
+#### Option 4: Using Docker
+```bash
+# Build and run with Docker
+docker build -t bookstore-backend .
+docker run -p 8080:8080 bookstore-backend
+```
+
 ### Access the Application
-- **API Base URL**: `http://localhost:3001/api/books`
-- **H2 Database Console**: `http://localhost:3001/h2-console`
-  - JDBC URL: `jdbc:h2:mem:bookstoredb`
-  - Username: `sa`
-  - Password: `password`
+- **API Base URL**: `http://localhost:8080/api/books`
+- **Health Check**: `http://localhost:8080/actuator/health`
 
 ## 📚 API Endpoints
 
@@ -202,10 +316,10 @@ data class Book(
 
 The application is configured via `application.yml`:
 
-- **Server Port**: 3001
-- **Database**: H2 in-memory database
-- **JPA**: Hibernate with auto DDL
-- **CORS**: Enabled for `http://localhost:3000`
+- **Server Port**: 8080 (configurable via PORT environment variable)
+- **Database**: PostgreSQL with environment variable configuration
+- **JPA**: Hibernate with auto DDL update
+- **Actuator**: Health and info endpoints enabled
 - **Logging**: DEBUG level for application packages
 
 ## 🧪 Testing the API
@@ -214,17 +328,17 @@ The application is configured via `application.yml`:
 
 1. **Get all books**:
    ```bash
-   curl http://localhost:3001/api/books
+   curl http://localhost:8080/api/books
    ```
 
 2. **Search books**:
    ```bash
-   curl "http://localhost:3001/api/books?search=gatsby&genre=Fiction"
+   curl "http://localhost:8080/api/books?search=gatsby&genre=Fiction"
    ```
 
 3. **Create a book**:
    ```bash
-   curl -X POST http://localhost:3001/api/books \
+   curl -X POST http://localhost:8080/api/books \
      -H "Content-Type: application/json" \
      -d '{
        "title": "Test Book",
@@ -238,7 +352,7 @@ The application is configured via `application.yml`:
 
 4. **Update stock**:
    ```bash
-   curl -X PATCH http://localhost:3001/api/books/1/stock \
+   curl -X PATCH http://localhost:8080/api/books/1/stock \
      -H "Content-Type: application/json" \
      -d '{"stock": 25}'
    ```
@@ -248,24 +362,23 @@ The application is configured via `application.yml`:
 For frontend integration, set the following environment variable:
 
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_API_URL=http://localhost:8080/api
 ```
 
 The API includes CORS configuration for `http://localhost:3000` to support frontend development.
 
 ## 🗄️ Database
 
-The application uses H2 in-memory database with the following features:
+The application uses PostgreSQL with the following features:
 
 - **Auto-creation**: Tables are created automatically on startup
 - **Sample Data**: 5 sample books are loaded via DataInitializer component
-- **Console Access**: Available at `/h2-console`
-- **Reset on Restart**: Database is recreated each time the application starts
+- **Environment Configuration**: Database connection via environment variables
+- **Production Ready**: Suitable for production deployment
 
 ## 🚀 Deployment
 
-To build the application for production:
-
+### Local Build
 ```bash
 # On Windows
 .\gradlew.bat build
@@ -276,22 +389,20 @@ To build the application for production:
 
 The JAR file will be created in `build/libs/` directory.
 
-## 🧹 Repository Cleanup
+### Docker Deployment
+```bash
+# Build Docker image
+docker build -t bookstore-backend .
 
-This repository has been cleaned up to include only essential files:
+# Run container
+docker run -p 8080:8080 bookstore-backend
+```
 
-✅ **Kept**:
-- Source code and configuration files
-- Gradle wrapper (no need for global Gradle installation)
-- Essential startup script
-- Documentation
-
-❌ **Removed**:
-- Build artifacts (`build/` directory)
-- Gradle cache (`.gradle/` directory)
-- Large Gradle distribution zip
-- Redundant batch files
-- SQL data file (replaced with DataInitializer)
+### Railway Deployment
+The application is configured for Railway deployment with:
+- Environment variable support for database configuration
+- PORT environment variable for server port
+- Docker containerization ready
 
 ## 📝 License
 

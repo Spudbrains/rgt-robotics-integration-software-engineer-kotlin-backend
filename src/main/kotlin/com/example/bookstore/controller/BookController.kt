@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 @RestController
 @RequestMapping("/api/books")
@@ -16,6 +17,12 @@ import java.util.*
     allowCredentials = "true"
 )
 class BookController(private val bookService: BookService) {
+    
+    // Track recent requests to identify duplicates
+    private val recentRequests = ConcurrentHashMap<String, Long>()
+    
+    // Simple cache for recent responses (5 second TTL)
+    private val responseCache = ConcurrentHashMap<String, Pair<Map<String, Any>, Long>>()
     
     @GetMapping("/health")
     fun healthCheck(): ResponseEntity<Map<String, Any>> {
@@ -36,9 +43,32 @@ class BookController(private val bookService: BookService) {
         @RequestParam(defaultValue = "asc") sortOrder: String
     ): ResponseEntity<Map<String, Any>> {
         val requestId = UUID.randomUUID().toString().substring(0, 8)
+        val requestKey = "page=$page&limit=$limit&search=$search&genre=$genre&sortBy=$sortBy&sortOrder=$sortOrder"
+        val currentTime = System.currentTimeMillis()
+        
+        // Check cache first
+        val cachedResponse = responseCache[requestKey]
+        if (cachedResponse != null && (currentTime - cachedResponse.second) < 5000) {
+            println("DEBUG [$requestId]: Returning cached response for page=$page")
+            return ResponseEntity.ok()
+                .header("Cache-Control", "public, max-age=5")
+                .header("X-Request-ID", requestId)
+                .header("X-Cached", "true")
+                .body(cachedResponse.first)
+        }
+        
+        // Check for duplicate requests within 1 second
+        val lastRequestTime = recentRequests[requestKey]
+        val isDuplicate = lastRequestTime != null && (currentTime - lastRequestTime) < 1000
         
         // Add debug logging for pagination issues
         println("DEBUG [$requestId]: getAllBooks called with page=$page, limit=$limit, search=$search, genre=$genre")
+        if (isDuplicate) {
+            println("WARNING [$requestId]: DUPLICATE REQUEST detected! Last request was ${currentTime - lastRequestTime}ms ago")
+        }
+        
+        // Update recent requests
+        recentRequests[requestKey] = currentTime
         
         // Validate pagination parameters
         val validatedPage = if (page < 0) 0 else page
@@ -60,16 +90,22 @@ class BookController(private val bookService: BookService) {
             "hasPrevious" to booksPage.hasPrevious(),
             "isFirst" to booksPage.isFirst(),
             "isLast" to booksPage.isLast(),
-            "requestId" to requestId
+            "requestId" to requestId,
+            "isDuplicate" to isDuplicate,
+            "timestamp" to currentTime
         )
         
-        println("DEBUG [$requestId]: Returning response with page=$validatedPage, totalPages=${booksPage.totalPages}, totalElements=${booksPage.totalElements}")
+        // Cache the response
+        responseCache[requestKey] = response to currentTime
+        
+        println("DEBUG [$requestId]: Returning response with page=$validatedPage, totalPages=${booksPage.totalPages}, totalElements=${booksPage.totalElements}, isDuplicate=$isDuplicate")
         
         return ResponseEntity.ok()
             .header("Cache-Control", "no-cache, no-store, must-revalidate")
             .header("Pragma", "no-cache")
             .header("Expires", "0")
             .header("X-Request-ID", requestId)
+            .header("X-Is-Duplicate", isDuplicate.toString())
             .body(response)
     }
     

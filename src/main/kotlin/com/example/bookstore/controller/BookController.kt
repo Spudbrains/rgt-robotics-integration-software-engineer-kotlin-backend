@@ -5,6 +5,7 @@ import com.example.bookstore.service.BookService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/api/books")
@@ -16,6 +17,15 @@ import org.springframework.web.bind.annotation.*
 )
 class BookController(private val bookService: BookService) {
     
+    @GetMapping("/health")
+    fun healthCheck(): ResponseEntity<Map<String, Any>> {
+        return ResponseEntity.ok(mapOf(
+            "status" to "healthy",
+            "timestamp" to System.currentTimeMillis(),
+            "service" to "bookstore-api"
+        ))
+    }
+    
     @GetMapping
     fun getAllBooks(
         @RequestParam(defaultValue = "0") page: Int,
@@ -25,8 +35,10 @@ class BookController(private val bookService: BookService) {
         @RequestParam(defaultValue = "title") sortBy: String,
         @RequestParam(defaultValue = "asc") sortOrder: String
     ): ResponseEntity<Map<String, Any>> {
+        val requestId = UUID.randomUUID().toString().substring(0, 8)
+        
         // Add debug logging for pagination issues
-        println("DEBUG: getAllBooks called with page=$page, limit=$limit, search=$search, genre=$genre")
+        println("DEBUG [$requestId]: getAllBooks called with page=$page, limit=$limit, search=$search, genre=$genre")
         
         // Validate pagination parameters
         val validatedPage = if (page < 0) 0 else page
@@ -43,12 +55,22 @@ class BookController(private val bookService: BookService) {
             "total" to booksPage.totalElements,
             "page" to validatedPage,
             "limit" to validatedLimit,
-            "totalPages" to booksPage.totalPages
+            "totalPages" to booksPage.totalPages,
+            "hasNext" to booksPage.hasNext(),
+            "hasPrevious" to booksPage.hasPrevious(),
+            "isFirst" to booksPage.isFirst(),
+            "isLast" to booksPage.isLast(),
+            "requestId" to requestId
         )
         
-        println("DEBUG: Returning response with page=$validatedPage, totalPages=${booksPage.totalPages}, totalElements=${booksPage.totalElements}")
+        println("DEBUG [$requestId]: Returning response with page=$validatedPage, totalPages=${booksPage.totalPages}, totalElements=${booksPage.totalElements}")
         
-        return ResponseEntity.ok(response)
+        return ResponseEntity.ok()
+            .header("Cache-Control", "no-cache, no-store, must-revalidate")
+            .header("Pragma", "no-cache")
+            .header("Expires", "0")
+            .header("X-Request-ID", requestId)
+            .body(response)
     }
     
     @GetMapping("/{id}")

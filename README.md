@@ -308,40 +308,155 @@ The application is configured via `application.yml`:
 - **Actuator**: Health and info endpoints enabled
 - **Logging**: DEBUG level for application packages
 
-## 🧪 Testing the API
+## 🧪 Testing
 
-### Using curl
+### Running Tests
 
-1. **Get all books**:
-   ```bash
-   curl http://localhost:8080/api/books
-   ```
+The application includes comprehensive tests that can be run using Gradle:
 
-2. **Search books**:
-   ```bash
-   curl "http://localhost:8080/api/books?search=gatsby&genre=Fiction"
-   ```
+#### Run All Tests
+```bash
+# On Windows
+.\gradlew.bat test
 
-3. **Create a book**:
-   ```bash
-   curl -X POST http://localhost:8080/api/books \
-     -H "Content-Type: application/json" \
-     -d '{
-       "title": "Test Book",
-       "author": "Test Author",
-       "isbn": "9781234567891",
-       "price": 15.99,
-       "stock": 10,
-       "genre": "Fiction"
-     }'
-   ```
+# On Unix/Linux/macOS
+./gradlew test
+```
 
-4. **Update stock**:
-   ```bash
-   curl -X PATCH http://localhost:8080/api/books/1/stock \
-     -H "Content-Type: application/json" \
-     -d '{"stock": 25}'
-   ```
+#### Run Tests with Detailed Output
+```bash
+# On Windows
+.\gradlew.bat test --info
+
+# On Unix/Linux/macOS
+./gradlew test --info
+```
+
+#### Run Specific Test Class
+```bash
+# On Windows
+.\gradlew.bat test --tests BookControllerTest
+
+# On Unix/Linux/macOS
+./gradlew test --tests BookControllerTest
+```
+
+#### Run Tests with Coverage Report
+```bash
+# On Windows
+.\gradlew.bat test jacocoTestReport
+
+# On Unix/Linux/macOS
+./gradlew test jacocoTestReport
+```
+
+#### Run Tests Continuously (Watch Mode)
+```bash
+# On Windows
+.\gradlew.bat test --continuous
+
+# On Unix/Linux/macOS
+./gradlew test --continuous
+```
+
+### Test Structure
+
+The test files are located in `src/test/kotlin/` and follow the same package structure as the main code:
+
+```
+src/test/kotlin/com/example/bookstore/
+├── BookstoreApplicationTests.kt      # Main application tests
+├── controller/
+│   └── BookControllerTest.kt         # REST API endpoint tests
+├── service/
+│   └── BookServiceTest.kt            # Business logic tests
+└── repository/
+    └── BookRepositoryTest.kt         # Data access layer tests
+```
+
+### Test Types
+
+#### Unit Tests
+- **Service Layer**: Tests business logic without database
+- **Repository Layer**: Tests data access with in-memory database
+- **Controller Layer**: Tests REST endpoints with mocked services
+
+#### Integration Tests
+- **End-to-End**: Tests complete request/response flow
+- **Database Integration**: Tests with real database operations
+
+#### Test Configuration
+Tests use:
+- **H2 Database**: In-memory database for testing
+- **Test Containers**: For integration tests (if configured)
+- **MockMvc**: For testing REST endpoints
+- **@DataJpaTest**: For repository tests
+- **@WebMvcTest**: For controller tests
+
+### Test Examples
+
+#### Running Controller Tests
+```bash
+# Test only controller layer
+.\gradlew.bat test --tests "*ControllerTest"
+```
+
+#### Running Service Tests
+```bash
+# Test only service layer
+.\gradlew.bat test --tests "*ServiceTest"
+```
+
+#### Running Repository Tests
+```bash
+# Test only repository layer
+.\gradlew.bat test --tests "*RepositoryTest"
+```
+
+### Test Reports
+
+After running tests, you can find:
+- **Test Results**: `build/test-results/`
+- **Test Reports**: `build/reports/tests/`
+- **Coverage Reports**: `build/reports/jacoco/` (if using JaCoCo)
+
+### Troubleshooting Tests
+
+#### Common Issues
+
+**Tests failing due to database connection:**
+```bash
+# Clean and rebuild
+.\gradlew.bat clean test
+```
+
+**Out of memory during tests:**
+```bash
+# Increase memory for tests
+.\gradlew.bat test -Dorg.gradle.jvmargs="-Xmx2g"
+```
+
+**Port conflicts during integration tests:**
+```bash
+# Use random ports
+.\gradlew.bat test -Dspring.test.port=0
+```
+
+### Continuous Integration
+
+For CI/CD pipelines, use:
+```bash
+# Run tests and build
+.\gradlew.bat clean build
+
+# Run tests only
+.\gradlew.bat test
+
+# Run tests with coverage
+.\gradlew.bat test jacocoTestReport
+```
+
+### Environment Setup
 
 ## 🔗 Frontend Integration
 
@@ -389,19 +504,3 @@ The application is configured for Railway deployment with:
 - Environment variable support for database configuration
 - PORT environment variable for server port
 - Docker containerization ready
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
----
-
-**Happy coding! 📚✨**

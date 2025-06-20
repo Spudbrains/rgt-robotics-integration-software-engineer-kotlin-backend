@@ -153,20 +153,6 @@ chmod +x gradlew
 sudo apt install --reinstall openjdk-17-jdk
 ```
 
-### Environment Setup
-
-Set up the following environment variables for database connection:
-
-```bash
-# Database Configuration
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/bookstoredb
-SPRING_DATASOURCE_USERNAME=your_username
-SPRING_DATASOURCE_PASSWORD=your_password
-
-# Server Configuration (optional)
-PORT=8080
-```
-
 ### Running the Application
 
 #### Option 1: Using the provided script (Windows)

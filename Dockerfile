@@ -11,6 +11,7 @@ COPY --from=build /app/build/libs/*.jar app.jar
 
 # Railway provides the PORT env variable
 ENV PORT=8080
+ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"] 

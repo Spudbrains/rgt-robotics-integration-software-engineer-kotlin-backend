@@ -2,9 +2,6 @@ spring:
   application:
     name: bookstore-api
   
-  profiles:
-    active: dev
-  
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     driver-class-name: org.postgresql.Driver
@@ -76,4 +73,38 @@ spring:
   
   sql:
     init:
-      mode: always 
+      mode: always
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        show_sql: false
+  
+  h2:
+    console:
+      enabled: false
+  
+  sql:
+    init:
+      mode: NEVER
+
+logging:
+  level:
+    com.example.bookstore: INFO
+    org.springframework.web: INFO 

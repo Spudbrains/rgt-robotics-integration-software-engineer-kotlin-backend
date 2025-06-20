@@ -163,7 +163,8 @@ class BookController(
             val updatedBook = bookService.sellBook(id, quantity)
             ResponseEntity.ok(updatedBook)
         } catch (e: Exception) {
-            ResponseEntity.badRequest().body(mapOf("error" to (e.message ?: "An unknown error occurred.")))
+            val errorMsg: Any = e.message ?: "An unknown error occurred."
+            ResponseEntity.badRequest().body(mapOf("error" to errorMsg))
         }
     }
 } 

@@ -71,4 +71,7 @@ interface SaleRepository : JpaRepository<Sale, Long> {
         ORDER BY totalQuantitySold DESC
     """)
     fun findTopSellingBooks(@Param("limit") limit: Int): List<Map<String, Any>>
+
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM Sale s ORDER BY s.saleDate DESC")
+    fun findTopSales(pageable: org.springframework.data.domain.Pageable): List<Sale>
 } 

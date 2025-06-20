@@ -130,4 +130,10 @@ class SaleController(private val saleService: SaleService) {
             return ResponseEntity.badRequest().body(mapOf("error" to e.message))
         }
     }
+    
+    @GetMapping
+    fun getSales(@RequestParam(defaultValue = "10") limit: Int): ResponseEntity<List<Sale>> {
+        val sales = saleService.getSales(limit)
+        return ResponseEntity.ok(sales)
+    }
 } 

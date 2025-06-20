@@ -78,4 +78,8 @@ class SaleService(
             "topSellingBooks" to getTopSellingBooks(5)
         )
     }
+    
+    fun getSales(limit: Int): List<Sale> {
+        return saleRepository.findTopSales(org.springframework.data.domain.PageRequest.of(0, limit))
+    }
 } 

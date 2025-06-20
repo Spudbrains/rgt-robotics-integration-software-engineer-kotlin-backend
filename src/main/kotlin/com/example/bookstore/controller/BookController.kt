@@ -119,7 +119,7 @@ class BookController(
         
         val response = mapOf(
             "book" to book,
-            "salesStatistics" to salesStats
+            "salesStatistics" to (salesStats ?: emptyMap<String, Any>())
         )
         
         return ResponseEntity.ok(response)
@@ -157,14 +157,15 @@ class BookController(
     fun sellBook(
         @PathVariable id: Long,
         @RequestBody request: Map<String, Int>
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Map<String, Any>> {
         val quantity = request["quantity"] ?: 1
         return try {
             val updatedBook = bookService.sellBook(id, quantity)
-            ResponseEntity.ok(updatedBook)
+            ResponseEntity.ok(mapOf("result" to updatedBook))
         } catch (e: Exception) {
-            val errorMsg: Any = e.message ?: "An unknown error occurred."
-            ResponseEntity.badRequest().body(mapOf("error" to errorMsg))
+            val errorMsg = e.message ?: "An unknown error occurred."
+            // Explicitly cast errorMsg to String (non-nullable)
+            ResponseEntity.badRequest().body(mapOf("error" to errorMsg as String))
         }
     }
 } 

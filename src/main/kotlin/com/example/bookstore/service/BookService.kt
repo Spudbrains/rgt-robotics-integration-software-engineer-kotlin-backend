@@ -2,6 +2,7 @@ package com.example.bookstore.service
 
 import com.example.bookstore.model.Book
 import com.example.bookstore.repository.BookRepository
+import com.example.bookstore.service.SaleService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -9,7 +10,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class BookService(private val bookRepository: BookRepository) {
+class BookService(
+    private val bookRepository: BookRepository,
+    private val saleService: SaleService
+) {
     
     fun getAllBooks(
         page: Int = 0,
@@ -79,13 +83,8 @@ class BookService(private val bookRepository: BookRepository) {
     
     @Transactional
     fun sellBook(id: Long, quantity: Int = 1): Book {
-        val book = getBookById(id)
-        
-        if (book.stock < quantity) {
-            throw RuntimeException("Insufficient stock. Available: ${book.stock}, Requested: $quantity")
-        }
-        
-        book.stock -= quantity
-        return bookRepository.save(book)
+        // Use the new SaleService to record the sale
+        val sale = saleService.recordSale(id, quantity)
+        return sale.book
     }
 } 

@@ -2,6 +2,7 @@ package com.example.bookstore.controller
 
 import com.example.bookstore.model.Book
 import com.example.bookstore.service.BookService
+import com.example.bookstore.service.SaleService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -16,7 +17,10 @@ import java.util.concurrent.ConcurrentHashMap
     methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH],
     allowCredentials = "true"
 )
-class BookController(private val bookService: BookService) {
+class BookController(
+    private val bookService: BookService,
+    private val saleService: SaleService
+) {
     
     // Track recent requests to identify duplicates
     private val recentRequests = ConcurrentHashMap<String, Long>()
@@ -113,6 +117,20 @@ class BookController(private val bookService: BookService) {
     fun getBookById(@PathVariable id: Long): ResponseEntity<Book> {
         val book = bookService.getBookById(id)
         return ResponseEntity.ok(book)
+    }
+    
+    // New endpoint to get book details with sales statistics
+    @GetMapping("/{id}/details")
+    fun getBookDetailsWithSales(@PathVariable id: Long): ResponseEntity<Map<String, Any>> {
+        val book = bookService.getBookById(id)
+        val salesStats = saleService.getSalesStatisticsForBook(id)
+        
+        val response = mapOf(
+            "book" to book,
+            "salesStatistics" to salesStats
+        )
+        
+        return ResponseEntity.ok(response)
     }
     
     @PostMapping

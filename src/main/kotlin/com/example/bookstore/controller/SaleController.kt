@@ -112,16 +112,14 @@ class SaleController(private val saleService: SaleService) {
     
     // Record a new sale (alternative to the existing sell endpoint)
     @PostMapping("/record")
-    fun recordSale(
-        @RequestBody request: Map<String, Any>
-    ): ResponseEntity<Map<String, Any>> {
+    fun recordSale(@RequestBody request: Map<String, Any>): ResponseEntity<Map<String, Any?>> {
         val bookId = (request["bookId"] as? Number)?.toLong()
             ?: return ResponseEntity.badRequest().body(mapOf("error" to "Book ID is required and must be a number."))
         val quantity = (request["quantity"] as? Number)?.toInt() ?: 1
         
         try {
             val sale = saleService.recordSale(bookId, quantity)
-            val response = mapOf(
+            val response: Map<String, Any?> = mapOf(
                 "message" to "Sale recorded successfully",
                 "saleId" to sale.id,
                 "bookId" to sale.book.id,

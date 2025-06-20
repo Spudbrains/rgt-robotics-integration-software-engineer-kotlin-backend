@@ -157,9 +157,13 @@ class BookController(
     fun sellBook(
         @PathVariable id: Long,
         @RequestBody request: Map<String, Int>
-    ): ResponseEntity<Book> {
+    ): ResponseEntity<out Any> {
         val quantity = request["quantity"] ?: 1
-        val updatedBook = bookService.sellBook(id, quantity)
-        return ResponseEntity.ok(updatedBook)
+        return try {
+            val updatedBook = bookService.sellBook(id, quantity)
+            ResponseEntity.ok(updatedBook)
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body(mapOf("error" to (e.message ?: "An unknown error occurred")))
+        }
     }
 } 

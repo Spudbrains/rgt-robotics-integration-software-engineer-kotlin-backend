@@ -8,7 +8,12 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = ["http://localhost:3000", "https://rgt-robotics-integration.vercel.app"])
+@CrossOrigin(
+    origins = ["http://localhost:3000", "https://rgt-robotics-integration.vercel.app"],
+    allowedHeaders = ["*"],
+    methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH],
+    allowCredentials = "true"
+)
 class BookController(private val bookService: BookService) {
     
     @GetMapping
@@ -20,15 +25,28 @@ class BookController(private val bookService: BookService) {
         @RequestParam(defaultValue = "title") sortBy: String,
         @RequestParam(defaultValue = "asc") sortOrder: String
     ): ResponseEntity<Map<String, Any>> {
-        val booksPage = bookService.getAllBooks(page, limit, search, genre, sortBy, sortOrder)
+        // Add debug logging for pagination issues
+        println("DEBUG: getAllBooks called with page=$page, limit=$limit, search=$search, genre=$genre")
+        
+        // Validate pagination parameters
+        val validatedPage = if (page < 0) 0 else page
+        val validatedLimit = when {
+            limit <= 0 -> 10
+            limit > 100 -> 100
+            else -> limit
+        }
+        
+        val booksPage = bookService.getAllBooks(validatedPage, validatedLimit, search, genre, sortBy, sortOrder)
         
         val response = mapOf(
             "books" to booksPage.content,
             "total" to booksPage.totalElements,
-            "page" to page,
-            "limit" to limit,
+            "page" to validatedPage,
+            "limit" to validatedLimit,
             "totalPages" to booksPage.totalPages
         )
+        
+        println("DEBUG: Returning response with page=$validatedPage, totalPages=${booksPage.totalPages}, totalElements=${booksPage.totalElements}")
         
         return ResponseEntity.ok(response)
     }

@@ -157,7 +157,7 @@ class BookController(
     fun sellBook(
         @PathVariable id: Long,
         @RequestBody request: Map<String, Int>
-    ): ResponseEntity<out Any> {
+    ): ResponseEntity<Any> {
         val quantity = request["quantity"] ?: 1
         return try {
             val updatedBook = bookService.sellBook(id, quantity)

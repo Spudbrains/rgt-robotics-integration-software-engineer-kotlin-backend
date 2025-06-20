@@ -23,35 +23,20 @@ class SaleService(
             throw RuntimeException("Insufficient stock. Available: ${book.stock}, Requested: $quantity")
         }
         
-        // Calculate total price
-        val totalPrice = book.price * quantity
-        
-        // Create sale record
         val sale = Sale(
             book = book,
             quantity = quantity,
-            totalPrice = totalPrice
+            totalPrice = book.price * quantity
         )
         
-        // Update book stock
         book.stock -= quantity
-        
-        // Save both sale and updated book
         bookRepository.save(book)
+        
         return saleRepository.save(sale)
     }
     
-    fun getSalesStatisticsForBook(bookId: Long): Map<String, Any> {
-        val stats = saleRepository.getSalesStatisticsForBook(bookId)
-        return stats ?: mapOf(
-            "bookId" to bookId,
-            "bookTitle" to "Unknown",
-            "bookAuthor" to "Unknown",
-            "totalQuantitySold" to 0,
-            "totalRevenue" to 0.0,
-            "numberOfSales" to 0,
-            "currentStock" to 0
-        )
+    fun getSalesStatisticsForBook(bookId: Long): Map<String, Any>? {
+        return saleRepository.getSalesStatisticsForBook(bookId)
     }
     
     fun getSalesStatisticsForAllBooks(): List<Map<String, Any>> {
@@ -59,7 +44,7 @@ class SaleService(
     }
     
     fun getTopSellingBooks(limit: Int = 10): List<Map<String, Any>> {
-        return saleRepository.getTopSellingBooks(limit)
+        return saleRepository.findTopSellingBooks(limit)
     }
     
     fun getRecentSales(days: Int = 30): List<Sale> {
@@ -81,9 +66,9 @@ class SaleService(
     
     fun getOverallSalesSummary(): Map<String, Any> {
         val allStats = getSalesStatisticsForAllBooks()
-        val totalBooksSold = allStats.sumOf { it["totalQuantitySold"] as Int }
-        val totalRevenue = allStats.sumOf { it["totalRevenue"] as Double }
-        val totalSales = allStats.sumOf { it["numberOfSales"] as Long }
+        val totalBooksSold = allStats.sumOf { (it["totalQuantitySold"] as? Number ?: 0).toLong() }
+        val totalRevenue = allStats.sumOf { (it["totalRevenue"] as? Number ?: 0).toDouble() }
+        val totalSales = allStats.sumOf { (it["numberOfSales"] as? Number ?: 0).toLong() }
         
         return mapOf(
             "totalBooksSold" to totalBooksSold,

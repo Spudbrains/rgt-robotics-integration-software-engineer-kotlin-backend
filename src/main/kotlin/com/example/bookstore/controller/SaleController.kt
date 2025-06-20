@@ -22,6 +22,7 @@ class SaleController(private val saleService: SaleService) {
     @GetMapping("/statistics/{bookId}")
     fun getSalesStatisticsForBook(@PathVariable bookId: Long): ResponseEntity<Map<String, Any>> {
         val stats = saleService.getSalesStatisticsForBook(bookId)
+            ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(stats)
     }
     
@@ -52,13 +53,12 @@ class SaleController(private val saleService: SaleService) {
         val recentSales = saleService.getRecentSales(days)
         val salesData = recentSales.map { sale ->
             mapOf(
-                "id" to (sale.id ?: 0L),
-                "bookId" to (sale.book.id ?: 0L),
+                "id" to sale.id,
+                "bookId" to sale.book.id,
                 "bookTitle" to sale.book.title,
                 "quantity" to sale.quantity,
                 "totalPrice" to sale.totalPrice,
-                "saleDate" to sale.saleDate,
-                "createdAt" to sale.createdAt
+                "saleDate" to sale.saleDate
             )
         }
         
@@ -115,21 +115,21 @@ class SaleController(private val saleService: SaleService) {
     fun recordSale(
         @RequestBody request: Map<String, Any>
     ): ResponseEntity<Map<String, Any>> {
-        val bookId = (request["bookId"] as? Number)?.toLong() 
-            ?: throw RuntimeException("Book ID is required")
+        val bookId = (request["bookId"] as? Number)?.toLong()
+            ?: return ResponseEntity.badRequest().body(mapOf("error" to "Book ID is required and must be a number."))
         val quantity = (request["quantity"] as? Number)?.toInt() ?: 1
         
-        val sale = saleService.recordSale(bookId, quantity)
-        
-        return ResponseEntity.ok(mapOf(
-            "message" to "Sale recorded successfully",
-            "saleId" to (sale.id ?: 0L),
-            "bookId" to (sale.book.id ?: 0L),
-            "bookTitle" to sale.book.title,
-            "quantity" to sale.quantity,
-            "totalPrice" to sale.totalPrice,
-            "saleDate" to sale.saleDate,
-            "remainingStock" to sale.book.stock
-        ))
+        try {
+            val sale = saleService.recordSale(bookId, quantity)
+            val response = mapOf(
+                "message" to "Sale recorded successfully",
+                "saleId" to sale.id,
+                "bookId" to sale.book.id,
+                "remainingStock" to sale.book.stock
+            )
+            return ResponseEntity.ok(response)
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        }
     }
 } 

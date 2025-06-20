@@ -81,13 +81,11 @@ class BookController(
         val response = mapOf(
             "books" to booksPage.content,
             "total" to booksPage.totalElements,
-            "page" to validatedPage,
-            "limit" to validatedLimit,
+            "page" to booksPage.number,
+            "limit" to booksPage.size,
             "totalPages" to booksPage.totalPages,
             "hasNext" to booksPage.hasNext(),
             "hasPrevious" to booksPage.hasPrevious(),
-            "isFirst" to booksPage.isFirst(),
-            "isLast" to booksPage.isLast(),
             "requestId" to requestId,
             "isDuplicate" to isDuplicate,
             "timestamp" to currentTime
@@ -150,7 +148,7 @@ class BookController(
         @PathVariable id: Long,
         @RequestBody request: Map<String, Int>
     ): ResponseEntity<Book> {
-        val newStock = request["stock"] ?: throw RuntimeException("Stock value is required")
+        val newStock = request["stock"] ?: throw IllegalArgumentException("Stock value is required")
         val updatedBook = bookService.updateStock(id, newStock)
         return ResponseEntity.ok(updatedBook)
     }

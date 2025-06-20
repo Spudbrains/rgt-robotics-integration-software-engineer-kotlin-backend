@@ -23,7 +23,6 @@ class BookService(
         sortBy: String = "title",
         sortOrder: String = "asc"
     ): Page<Book> {
-        println("DEBUG: search=$search (${search?.javaClass?.name}), genre=$genre (${genre?.javaClass?.name}), sortBy=$sortBy (${sortBy.javaClass.name}), sortOrder=$sortOrder (${sortOrder.javaClass.name})")
         val sort = if (sortOrder.equals("desc", ignoreCase = true)) {
             Sort.by(Sort.Direction.DESC, sortBy)
         } else {
@@ -83,7 +82,6 @@ class BookService(
     
     @Transactional
     fun sellBook(id: Long, quantity: Int = 1): Book {
-        // Use the new SaleService to record the sale
         val sale = saleService.recordSale(id, quantity)
         return sale.book
     }

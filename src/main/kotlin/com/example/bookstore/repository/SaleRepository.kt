@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 
 @Repository
 interface SaleRepository : JpaRepository<Sale, Long> {
@@ -54,12 +55,8 @@ interface SaleRepository : JpaRepository<Sale, Long> {
     fun getSalesStatisticsForBook(@Param("bookId") bookId: Long): Map<String, Any>?
     
     // Get recent sales (last N days)
-    @Query("""
-        SELECT s FROM Sale s 
-        WHERE s.saleDate >= :startDate 
-        ORDER BY s.saleDate DESC
-    """)
-    fun findRecentSales(@Param("startDate") startDate: java.time.LocalDateTime): List<Sale>
+    @Query("SELECT s FROM Sale s WHERE s.saleDate >= :startDate ORDER BY s.saleDate DESC")
+    fun findRecentSales(@Param("startDate") startDate: LocalDateTime): List<Sale>
     
     // Get top selling books
     @Query("""
@@ -72,7 +69,6 @@ interface SaleRepository : JpaRepository<Sale, Long> {
         LEFT JOIN Sale s ON b.id = s.book.id
         GROUP BY b.id, b.title, b.author
         ORDER BY totalQuantitySold DESC
-        LIMIT :limit
     """)
-    fun getTopSellingBooks(@Param("limit") limit: Int): List<Map<String, Any>>
+    fun findTopSellingBooks(@Param("limit") limit: Int): List<Map<String, Any>>
 } 

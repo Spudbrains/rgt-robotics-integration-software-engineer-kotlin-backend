@@ -1,5 +1,6 @@
 package com.example.bookstore.controller
 
+import com.example.bookstore.model.Sale
 import com.example.bookstore.service.SaleService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

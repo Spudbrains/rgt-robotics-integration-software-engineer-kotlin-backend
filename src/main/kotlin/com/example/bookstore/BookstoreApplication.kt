@@ -18,7 +18,11 @@ fun corsConfigurer(): WebMvcConfigurer {
     return object : WebMvcConfigurer {
         override fun addCorsMappings(registry: CorsRegistry) {
             registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000", "https://rgt-robotics-integration.vercel.app")
+                .allowedOriginPatterns(
+                    "http://localhost:3000",
+                    "https://rgt-robotics-integration.vercel.app",
+                    "https://rgt-robotics-integration-*.vercel.app"
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)

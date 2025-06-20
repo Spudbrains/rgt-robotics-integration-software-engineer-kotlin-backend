@@ -11,12 +11,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(
-    origins = ["http://localhost:3000", "https://rgt-robotics-integration.vercel.app"],
-    allowedHeaders = ["*"],
-    methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH],
-    allowCredentials = "true"
-)
 class BookController(
     private val bookService: BookService,
     private val saleService: SaleService

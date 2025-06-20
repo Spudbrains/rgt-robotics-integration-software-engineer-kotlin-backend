@@ -6,12 +6,6 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/sales")
-@CrossOrigin(
-    origins = ["http://localhost:3000", "https://rgt-robotics-integration.vercel.app"],
-    allowedHeaders = ["*"],
-    methods = [RequestMethod.GET, RequestMethod.POST],
-    allowCredentials = "true"
-)
 class SaleController(private val saleService: SaleService) {
     
     // Get sales statistics for all books

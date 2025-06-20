@@ -64,7 +64,7 @@ class BookController(private val bookService: BookService) {
         // Add debug logging for pagination issues
         println("DEBUG [$requestId]: getAllBooks called with page=$page, limit=$limit, search=$search, genre=$genre")
         if (isDuplicate) {
-            println("WARNING [$requestId]: DUPLICATE REQUEST detected! Last request was ${currentTime - lastRequestTime}ms ago")
+            println("WARNING [$requestId]: DUPLICATE REQUEST detected! Last request was ${currentTime - lastRequestTime!!}ms ago")
         }
         
         // Update recent requests
